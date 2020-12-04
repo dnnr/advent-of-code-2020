@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::iter::FromIterator;
 
 pub fn part1(inp: String) {
-    let passports = parse_input(&inp);
+    let passports = parse_file(&inp);
 
     let valid_count = passports.iter().filter(|x| is_valid(x)).count();
     println!("Valid: {}", valid_count);
@@ -10,16 +10,19 @@ pub fn part1(inp: String) {
 
 pub fn part2(_: String) {}
 
-fn parse_input(inp: &str) -> Vec<Vec<String>> {
+fn parse_passport(passport: &str) -> Vec<String> {
+    passport
+        .split(" ")
+        .map(|word| word.split(":").next().unwrap())
+        .map(|word| word.to_owned())
+        .collect::<Vec<String>>()
+}
+
+fn parse_file(inp: &str) -> Vec<Vec<String>> {
     inp.split("\n\n")
         .filter(|line| line.len() > 0)
         .map(|line| line.replace("\n", " "))
-        .map(|line| {
-            line.split(" ")
-                .map(|word| word.split(":").next().unwrap())
-                .map(|word| word.to_owned())
-                .collect::<Vec<String>>()
-        })
+        .map(|line| parse_passport(&line))
         .collect::<Vec<Vec<String>>>()
 }
 
