@@ -1,6 +1,6 @@
+use regex::Regex;
 use std::collections::HashSet;
 use std::iter::FromIterator;
-use regex::Regex;
 
 pub fn part1(inp: String) {
     let passports = parse_file(&inp);
@@ -33,7 +33,7 @@ fn validate_field(
     let name_value = field.split(":").collect::<Vec<&str>>();
 
     if name_value.len() != 2 {
-        return false
+        return false;
     }
 
     let name = name_value[0];
@@ -56,13 +56,22 @@ fn validate_passport(passport: &str) -> bool {
     let haircolor_checker = HairColorChecker::new();
     let pid_checker = PidChecker::new();
 
-    let fields = passport.split(" ").map(|x| x.to_owned()).collect::<Vec<String>>();
+    let fields = passport
+        .split(" ")
+        .map(|x| x.to_owned())
+        .collect::<Vec<String>>();
 
-    if !has_all_fields(&fields.iter().map(|x| x.split(":").next().unwrap().to_owned()).collect::<Vec<String>>()) {
+    if !has_all_fields(
+        &fields
+            .iter()
+            .map(|x| x.split(":").next().unwrap().to_owned())
+            .collect::<Vec<String>>(),
+    ) {
         return false;
     }
 
-    fields.iter()
+    fields
+        .iter()
         .map(|word| validate_field(word, &haircolor_checker, &pid_checker))
         .all(|x| x)
 }
@@ -151,7 +160,10 @@ impl PidChecker {
     fn new() -> Self {
         let regex_works = Regex::new("[0-9]{9}").unwrap();
         let regex_worksnt = Regex::new("^[0-9]{9}$").unwrap();
-        Self { regex_works, regex_worksnt }
+        Self {
+            regex_works,
+            regex_worksnt,
+        }
     }
 
     fn is_valid_pid(&self, field: &str) -> bool {
@@ -164,9 +176,7 @@ impl PidChecker {
             // println!("Invalid pid? {}", field);
         }
         ret1
-
     }
-
 }
 
 fn is_valid_eyecolor(field: &str) -> bool {
