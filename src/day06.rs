@@ -13,7 +13,9 @@ pub fn part1(inp: String) {
 pub fn part2(inp: String) {
     let groups = read_groups(&inp);
 
-    let common_answers = groups.iter().map(|group| get_common_answers_in_group(group));
+    let common_answers = groups
+        .iter()
+        .map(|group| get_common_answers_in_group(group));
 
     let sum: usize = common_answers.map(|a| a.len()).sum();
 
@@ -65,12 +67,8 @@ mod test {
 
         let answers = get_any_answers_in_group(group);
 
-        assert_eq!(
-            answers,
-            expected_answers
-        );
+        assert_eq!(answers, expected_answers);
     }
-
 
     #[test]
     pub fn get_common_answers_in_group_sample1() {
@@ -79,9 +77,6 @@ mod test {
 
         let answers = get_common_answers_in_group(group);
 
-        assert_eq!(
-            answers,
-            expected_answers
-        );
+        assert_eq!(answers, expected_answers);
     }
 }
