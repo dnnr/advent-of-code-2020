@@ -4,6 +4,7 @@
 name = "advent_of_code_2020"
 version = "0.1.0"
 dependencies = [
+ "partial_application",
  "regex",
 ]
 
@@ -27,6 +28,12 @@ name = "memchr"
 version = "2.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
+
+[[package]]
+name = "partial_application"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f926567968c32d22274b8eb721210363e54dcd8d2c960dd8533aa3be78143081"
 
 [[package]]
 name = "regex"
