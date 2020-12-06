@@ -27,7 +27,7 @@ pub fn part2(inp: String) {
     let mut last = seat_ids[0];
     for cur in &seat_ids[1..] {
         if cur - 1 != last {
-            break
+            break;
         }
         last = *cur;
     }
