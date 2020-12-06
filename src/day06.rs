@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::iter::FromIterator;
 
 pub fn part1(inp: String) {
     let groups = read_groups(&inp);
@@ -24,14 +23,14 @@ pub fn part2(inp: String) {
 fn read_groups(inp: &str) -> Vec<&str> {
     inp.split("\n\n")
         .filter(|line| line.len() > 0)
-        .collect::<Vec<&str>>()
+        .collect::<Vec<_>>()
 }
 
 fn get_common_answers_in_group(group: &str) -> HashSet<char> {
     let people = group
         .split("\n")
         .filter(|line| line.len() > 0)
-        .map(|line| HashSet::from_iter(line.chars()))
+        .map(|line| line.chars().collect())
         .collect::<Vec<HashSet<char>>>();
 
     if people.is_empty() {
@@ -58,18 +57,17 @@ fn get_any_answers_in_group(group: &str) -> HashSet<char> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::iter::FromIterator;
 
     #[test]
     pub fn get_any_answers_in_group_sample1() {
         let group = "abcx\nabcy\nabcz\n";
-        let expected_answers = vec!['a', 'b', 'c', 'x', 'y', 'z'];
+        let expected_answers: HashSet<_> = ['a', 'b', 'c', 'x', 'y', 'z'].iter().cloned().collect();
 
         let answers = get_any_answers_in_group(group);
 
         assert_eq!(
             answers,
-            HashSet::from_iter(expected_answers.iter().cloned())
+            expected_answers
         );
     }
 
@@ -77,13 +75,13 @@ mod test {
     #[test]
     pub fn get_common_answers_in_group_sample1() {
         let group = "abcx\nabcy\nabcz\n";
-        let expected_answers = vec!['a', 'b', 'c'];
+        let expected_answers: HashSet<_> = ['a', 'b', 'c'].iter().cloned().collect();
 
         let answers = get_common_answers_in_group(group);
 
         assert_eq!(
             answers,
-            HashSet::from_iter(expected_answers.iter().cloned())
+            expected_answers
         );
     }
 }
