@@ -158,8 +158,8 @@ struct PidChecker {
 
 impl PidChecker {
     fn new() -> Self {
-        let regex_works = Regex::new("[0-9]{9}").unwrap();
-        let regex_worksnt = Regex::new("^[0-9]{9}$").unwrap();
+        let regex_works = Regex::new("[0-9]{9}").unwrap(); // works but shouldn't
+        let regex_worksnt = Regex::new("^[0-9]{9}$").unwrap(); // worksn't but should
         Self {
             regex_works,
             regex_worksnt,
@@ -167,15 +167,12 @@ impl PidChecker {
     }
 
     fn is_valid_pid(&self, field: &str) -> bool {
-        let ret1 = self.regex_works.is_match(field);
-        let ret2 = self.regex_worksnt.is_match(field);
-        if ret1 != ret2 {
-            panic!("Wtf? {}", field);
+        let ret_works = self.regex_works.is_match(field);
+        let ret_worksnt = self.regex_worksnt.is_match(field);
+        if ret_works != ret_worksnt {
+            // panic!("Wtf? {}", field);
         }
-        if !ret1 {
-            // println!("Invalid pid? {}", field);
-        }
-        ret1
+        ret_works
     }
 }
 
