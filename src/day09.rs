@@ -7,7 +7,36 @@ pub fn part1(inp: String) {
     println!("First invalid number: {}", first_invalid);
 }
 
-pub fn part2(_inp: String) {}
+pub fn part2(inp: String) {
+    let preamble_length = 25;
+    let numbers = read_numbers(&inp);
+
+    let first_invalid = find_first_invalid_number(&numbers, preamble_length);
+
+    let mut subsequence = find_subsequence_with_sum(&numbers, first_invalid);
+    subsequence.sort();
+    let solution = subsequence[0] + subsequence.last().unwrap();
+
+    println!("Found solution: {}", solution);
+}
+
+fn find_subsequence_with_sum(numbers: &Vec<usize>, sum: usize) -> Vec<usize> {
+    for (index, _) in numbers.iter().enumerate() {
+        let mut subsequence = Vec::<usize>::new();
+        for another_number in numbers[index..].iter() {
+            subsequence.push(*another_number);
+            let current_sum = subsequence.iter().sum::<usize>();
+            if current_sum == sum {
+                // found it!
+                return subsequence;
+            } else if current_sum > sum {
+                // too large already :-(
+                break;
+            }
+        }
+    }
+    panic!("Could not find any subsequence");
+}
 
 fn find_first_invalid_number(numbers: &Vec<usize>, preamble_length: usize) -> usize {
     for (index, number) in numbers.iter().enumerate().skip(preamble_length) {
@@ -49,7 +78,21 @@ mod test {
     use super::*;
 
     #[test]
-    pub fn get_premable_sample2() {
+    pub fn find_subsequence_with_sum_sample1() {
+        let numbers = vec![
+            35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309,
+            576,
+        ];
+        let first_invalid = 127;
+        let expected_subsequence = vec![15, 25, 47, 40];
+
+        let subsequence = find_subsequence_with_sum(&numbers, first_invalid);
+
+        assert_eq!(subsequence, expected_subsequence);
+    }
+
+    #[test]
+    pub fn get_premable_sample1() {
         let all_numbers = vec![9, 8, 7, 6, 5, 4, 3, 2, 1];
         let index = 7;
         let length = 3;
