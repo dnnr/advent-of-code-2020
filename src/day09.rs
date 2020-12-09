@@ -2,16 +2,22 @@ pub fn part1(inp: String) {
     let preamble_length = 25;
     let numbers = read_numbers(&inp);
 
-    for (index, number) in numbers.iter().enumerate().skip(preamble_length) {
-        let preamble = get_preamble(&numbers, index, preamble_length);
-        if !is_valid_number(&preamble, *number) {
-            println!("First invalid number: {}", number);
-            return;
-        }
-    }
+    let first_invalid = find_first_invalid_number(&numbers, preamble_length);
+
+    println!("First invalid number: {}", first_invalid);
 }
 
 pub fn part2(_inp: String) {}
+
+fn find_first_invalid_number(numbers: &Vec<usize>, preamble_length: usize) -> usize {
+    for (index, number) in numbers.iter().enumerate().skip(preamble_length) {
+        let preamble = get_preamble(&numbers, index, preamble_length);
+        if !is_valid_number(&preamble, *number) {
+            return *number;
+        }
+    }
+    panic!("No invalid number found");
+}
 
 fn read_numbers(inp: &str) -> Vec<usize> {
     inp.split("\n")
