@@ -1,6 +1,6 @@
+use regex::Regex;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use regex::Regex;
 
 pub fn part1(inp: String) {
     let rule_map = make_rule_map(&inp);
@@ -16,10 +16,13 @@ pub fn part1(inp: String) {
     println!("Count of shiny gold holders: {}", holds_shiny_gold.len());
 }
 
-pub fn part2(_inp: String) {
-}
+pub fn part2(_inp: String) {}
 
-fn shiny_gold_is_reachable(color: &String, rule_map: &HashMap<String, Vec<RuleEntry>>, known_true: &HashSet<String>) -> bool {
+fn shiny_gold_is_reachable(
+    color: &String,
+    rule_map: &HashMap<String, Vec<RuleEntry>>,
+    known_true: &HashSet<String>,
+) -> bool {
     if known_true.contains(color) {
         return true;
     }
@@ -69,7 +72,7 @@ impl RuleParser {
 
     // Goesn't :-(
     // pub fn parse(&self, rule: &str) -> (&str, Vec<RuleEntry>) {
-        // (rule, vec![RuleEntry { count: 0, color: "foo".to_owned() }])
+    // (rule, vec![RuleEntry { count: 0, color: "foo".to_owned() }])
     // }
 
     pub fn parse(&self, rule: String) -> (String, Vec<RuleEntry>) {
@@ -79,25 +82,28 @@ impl RuleParser {
         let right_str = left_right[1];
 
         if right_str == "no other bags." {
-            return (left_color.to_owned(), vec![])
+            return (left_color.to_owned(), vec![]);
         }
 
         let num_and_color_to_rule_entry = |string: &str| -> RuleEntry {
             let capture = self.regex.captures_iter(string).next().unwrap();
             let num = match capture[1].parse::<usize>() {
                 Ok(num) => num,
-                _ => panic!("Cannot parse as number: {}", &capture[1])
+                _ => panic!("Cannot parse as number: {}", &capture[1]),
             };
             let color = &capture[2];
 
-            RuleEntry { count: num, color: color.to_string() }
+            RuleEntry {
+                count: num,
+                color: color.to_string(),
+            }
         };
 
         let rule_entries: Vec<_> = right_str
             .trim_end_matches(".")
             .split(", ")
             .map(|x| x.trim_end_matches(" bag").trim_end_matches(" bags"))
-            .map(|x| num_and_color_to_rule_entry(x) )
+            .map(|x| num_and_color_to_rule_entry(x))
             .collect();
 
         (left_color.to_owned(), rule_entries)
