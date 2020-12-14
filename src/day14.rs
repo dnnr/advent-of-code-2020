@@ -6,12 +6,18 @@ use std::collections::HashMap;
 pub fn part1(inp: String) {
     let commands = read_commands(&inp);
 
-    let sum = compute_sum(&commands);
+    let sum = compute_sum_part1(&commands);
     println!("Sum: {}", sum);
 }
 
-pub fn part2(_inp: String) {}
-fn compute_sum(commands: &Vec<Command>) -> u64 {
+pub fn part2(inp: String) {
+    let commands = read_commands(&inp);
+
+    let sum = compute_sum_part2(&commands);
+    println!("Sum: {}", sum);
+}
+
+fn compute_sum_part1(commands: &Vec<Command>) -> u64 {
     let mut memory = Memory::new();
     for command in commands {
         match command {
@@ -19,9 +25,30 @@ fn compute_sum(commands: &Vec<Command>) -> u64 {
                 // println!("set_mask({})", &mask);
                 memory.set_mask(&mask);
             }
-            Command::SetValue(set_value) => {
-                // println!("set_value({}, {})",set_value.address, set_value.value);
-                memory.set_value(set_value.address, set_value.value);
+            Command::SetValue(set_masked_value) => {
+                // println!("set_masked_value({}, {})",set_masked_value.address, set_masked_value.value);
+                memory.set_masked_value(set_masked_value.address, set_masked_value.value);
+            }
+        }
+    }
+
+    // println!("{:?}", memory.get_all_values());
+
+    let sum: u64 = memory.get_all_values().values().sum();
+    sum
+}
+
+fn compute_sum_part2(commands: &Vec<Command>) -> u64 {
+    let mut memory = Memory::new();
+    for command in commands {
+        match command {
+            Command::SetMask(mask) => {
+                // println!("set_mask({})", &mask);
+                memory.set_mask(&mask);
+            }
+            Command::SetValue(set_masked_value) => {
+                // println!("set_masked_value({}, {})",set_masked_value.address, set_masked_value.value);
+                memory.set_value_with_address_mask(set_masked_value.address, set_masked_value.value);
             }
         }
     }
@@ -77,16 +104,18 @@ fn parse_command(line: &str) -> Command {
 }
 
 struct Memory {
-    mask_force_one: u64,  // if mask bit is 1, force value bit to 1 (bitwise OR)
-    mask_force_zero: u64, // if mask bit is 0, force value bit to 0 (bitwise AND)
+    mask_has_x_at: Vec<usize>,
+    mask_has_one: u64,  // if mask bit is 1, force value bit to 1 (bitwise OR)
+    mask_has_zero: u64, // if mask bit is 0, force value bit to 0 (bitwise AND)
     memory: HashMap<usize, u64>,
 }
 
 impl Memory {
     pub fn new() -> Self {
         Self {
-            mask_force_one: 0,
-            mask_force_zero: std::u64::MAX,
+            mask_has_x_at: Vec::new(),
+            mask_has_one: 0,
+            mask_has_zero: std::u64::MAX,
             memory: HashMap::new(),
         }
     }
@@ -104,37 +133,68 @@ impl Memory {
             .collect::<Vec<Option<u8>>>();
 
         // Reset masks
-        self.mask_force_one = 0;
-        self.mask_force_zero = std::u64::MAX;
+        self.mask_has_x_at = Vec::new();
+        self.mask_has_one = 0;
+        self.mask_has_zero = std::u64::MAX;
 
-        // println!("{:#066b}", self.mask_force_one);
-        // println!("{:#066b}", self.mask_force_zero);
+        // println!("{:#066b}", self.mask_has_one);
+        // println!("{:#066b}", self.mask_has_zero);
 
         for (index, value) in mask.iter().rev().enumerate() {
             match value {
                 Some(value) => {
                     if *value == 1 {
-                        self.mask_force_one |= 1 << index;
+                        self.mask_has_one |= 1 << index;
                     } else {
-                        self.mask_force_zero &= !(1 << index);
+                        self.mask_has_zero &= !(1 << index);
                     }
                 }
-                None => (),
+                None => {
+                    self.mask_has_x_at.push(index);
+                },
             }
         }
 
-        // println!("{:#066b}", self.mask_force_one);
-        // println!("{:#066b}", self.mask_force_zero);
+        // println!("{:#066b}", self.mask_has_one);
+        // println!("{:#066b}", self.mask_has_zero);
     }
 
-    pub fn set_value(&mut self, address: usize, value: u64) {
+    fn apply_mask_to_value(value: u64, mask_has_one: u64, mask_has_zero: u64) -> u64 {
         let mut masked_value = value;
-        masked_value |= self.mask_force_one;
-        masked_value &= self.mask_force_zero;
+        masked_value |= mask_has_one;
+        masked_value &= mask_has_zero;
+        masked_value
+    }
+
+    pub fn set_masked_value(&mut self, address: usize, value: u64) {
+        let masked_value = Self::apply_mask_to_value(value, self.mask_has_one, self.mask_has_zero);
         if masked_value == 0 {
             self.memory.remove(&address);
         } else {
             self.memory.insert(address, masked_value);
+        }
+    }
+
+    pub fn set_value_with_address_mask(&mut self, address: usize, value: u64) {
+        let mut addresses: Vec<u64> = Vec::new();
+
+        addresses.push(address as u64 | self.mask_has_one);
+        for x_index in self.mask_has_x_at.iter() {
+            let old_addresses = addresses;
+            let mut new_addresses: Vec<u64> = Vec::new();
+            for old_address in old_addresses {
+                // float variant A: set that bit to zero
+                new_addresses.push(old_address & !(1 << x_index));
+
+                // float variant B: set that bit to one
+                new_addresses.push(old_address | (1 << x_index));
+            }
+            addresses = new_addresses;
+        }
+
+        for address in addresses {
+            // println!("Writing with to {:#038b}", address);
+            self.memory.insert(address as usize, value);
         }
     }
 
@@ -156,7 +216,7 @@ mod test {
 
         let mut memory = Memory::new();
         memory.set_mask(mask);
-        memory.set_value(address, value);
+        memory.set_masked_value(address, value);
 
         let all_values = memory.get_all_values();
         assert_eq!(all_values.len(), 1);
@@ -169,9 +229,9 @@ mod test {
 
         let mut memory = Memory::new();
         memory.set_mask(mask);
-        memory.set_value(8, 11);
-        memory.set_value(7, 101);
-        memory.set_value(8, 0);
+        memory.set_masked_value(8, 11);
+        memory.set_masked_value(7, 101);
+        memory.set_masked_value(8, 0);
 
         let all_values = memory.get_all_values();
         assert_eq!(all_values.len(), 2);
@@ -180,14 +240,25 @@ mod test {
     }
 
     #[test]
-    fn compute_sum_for_sample() {
+    fn compute_sum_for_sample_part1() {
         let program =
             "mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X\nmem[8] = 11\nmem[7] = 101\nmem[8] = 0";
 
         let commands = read_commands(&program);
         // println!("{:?}", commands);
-        let sum = compute_sum(&commands);
+        let sum = compute_sum_part1(&commands);
 
         assert_eq!(sum, 165);
+    }
+
+    #[test]
+    fn compute_sum_for_sample_part2() {
+        let program = "mask = 000000000000000000000000000000X1001X\nmem[42] = 100\nmask = 00000000000000000000000000000000X0XX\nmem[26] = 1";
+
+        let commands = read_commands(&program);
+        // println!("{:?}", commands);
+        let sum = compute_sum_part2(&commands);
+
+        assert_eq!(sum, 208);
     }
 }
