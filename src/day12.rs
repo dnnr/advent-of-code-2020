@@ -14,7 +14,6 @@ pub fn part2(inp: String) {
     let distance = x.abs() + y.abs();
 
     println!("Manhattan distance from origin: {}", distance);
-
 }
 
 pub fn perform_waypoint_moves(moves: &Vec<(char, i32)>) -> (i32, i32) {
@@ -136,7 +135,6 @@ pub fn turn(old_azimuth: char, direction: char, degrees: i32) -> char {
     new_azimuth
 }
 
-
 fn parse_move(line: &str) -> (char, i32) {
     let action = line.chars().nth(0).unwrap();
     let value = line[1..].parse::<i32>().unwrap();
@@ -207,7 +205,6 @@ mod test {
         let result = perform_moves(&read_moves(moves));
         assert_eq!(result, expected_result);
     }
-
 
     #[test]
     pub fn perform_waypoint_moves_sample() {

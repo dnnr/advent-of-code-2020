@@ -1,5 +1,8 @@
 // Source: https://repl.it/@Scoder12/aoc-rust-template
 
+#[macro_use]
+extern crate lazy_static;
+
 // Days
 pub mod day03;
 pub mod day04;
